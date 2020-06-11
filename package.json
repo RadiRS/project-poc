@@ -7,11 +7,14 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pod-install": "cd ios && pod install && cd ..",
+    "android-clean": "cd android && ./gradlew clean && cd .."
   },
   "dependencies": {
     "react": "16.11.0",
-    "react-native": "0.62.2"
+    "react-native": "0.62.2",
+    "react-native-fingerprint-scanner": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",

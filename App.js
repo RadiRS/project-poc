@@ -1,12 +1,5 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, {useEffect} from 'react';
+import ReactNativeBiometrics from 'react-native-biometrics';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,17 +7,91 @@ import {
   View,
   Text,
   StatusBar,
+  TouchableOpacity,
+  NativeModules,
+  DeviceEventEmitter,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
 const App = () => {
+  useEffect(() => {
+    DeviceEventEmitter.addListener('FINGERPRINT_SCANNER', msg => {
+      console.warn('App -> msg', msg);
+    });
+
+    scanFingerprint();
+  });
+
+  const handlePressBiometric = async () => {
+    try {
+      // Check sensor is available or not
+      const {
+        available,
+        biometryType,
+      } = await ReactNativeBiometrics.isSensorAvailable();
+
+      if (available) {
+        if (biometryType === ReactNativeBiometrics.TouchID) {
+          createSignature();
+        } else if (biometryType === ReactNativeBiometrics.FaceID) {
+          console.warn('FaceID is supported');
+        } else if (biometryType === ReactNativeBiometrics.Biometrics) {
+          createSignature();
+        }
+      } else {
+        console.log('Biometrics not supported');
+      }
+    } catch (error) {
+      console.log('handlePressBiometric -> error', error);
+    }
+  };
+
+  const createSignature = async () => {
+    try {
+      const epochTimeSeconds = Math.round(
+        new Date().getTime() / 1000,
+      ).toString();
+      const payload = epochTimeSeconds + 'some message';
+
+      const {signature, success} = await ReactNativeBiometrics.createSignature({
+        promptMessage: 'Sign in',
+        cancelButtonText: 'Batal',
+        payload,
+      });
+
+      if (success) {
+        console.log('createSignature -> signature', signature, payload);
+        // verifySignatureWithServer(signature, payload);
+      }
+    } catch (error) {
+      console.log('createSignature -> error', error);
+    }
+  };
+
+  const createKey = async () => {
+    try {
+      const {publicKey} = await ReactNativeBiometrics.createKeys({
+        test: 'asdf',
+      });
+
+      console.log('createKey -> publicKey', publicKey);
+      return publicKey;
+      // sendPublicKeyToServer(publicKey);
+    } catch (error) {
+      console.log('createKey -> error', error);
+    }
+  };
+
+  const scanFingerprint = async () => {
+    try {
+      const res = await NativeModules.ReactNativeFingerprintScanner.authenticate();
+      console.warn('scanFingerprint -> res', res);
+    } catch (error) {
+      console.warn('scanFingerprint -> error', error);
+    }
+  };
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -40,31 +107,13 @@ const App = () => {
           )}
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
+              <TouchableOpacity onPress={handlePressBiometric}>
+                <Text style={styles.sectionTitle}>Test Biometric</Text>
+              </TouchableOpacity>
               <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
+                Testing biometric with fingerprint or touch id
               </Text>
             </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
           </View>
         </ScrollView>
       </SafeAreaView>

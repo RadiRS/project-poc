@@ -194,7 +194,6 @@
 				3A6AD70AD305461012DDDF15 /* Pods-projectpoc-tvOSTests.debug.xcconfig */,
 				D007723A89517A1298EE4976 /* Pods-projectpoc-tvOSTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

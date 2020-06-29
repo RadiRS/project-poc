@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
+import Push from './src/push/Push';
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
               <Text style={styles.sectionDescription}>
                 Testing huawei push notification
               </Text>
+              <Push />
             </View>
           </View>
         </ScrollView>
